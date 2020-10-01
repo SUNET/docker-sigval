@@ -93,6 +93,27 @@ The `tsltrust-root` and `trusted-folder` configuration options can be used indiv
 
 The certificates `EuQCCert_root.cer` and `EuQCTsa_root.cer` are sample root certificates that can be used for `tsltrust-root` configuraiton where `EuQCCert_root.cer` extends trust to EU QualifiedCertificate issuers and where `EuQCTsa_root.cer` extends trust to EU Qualified Timestamp services and EU QualifiedCertificate issuers. The latter is intended for timestamp validation and the first for certificate validation of EU qualified signatures.
 
+## 2.4 SVT Model
+The SVT model defines critical parameters for issuing SVT tokens. The SVT model is defined by the following `application.properties` parameters
+
+Parameter | Feature
+--- | ---
+sigval-service.svt.model.issuer-id  |  The identity of the SVT issuer as a single string identifier. This should be URI type identifier using a domain name owned by the SVT issuer
+sigval-service.svt.model.validity-years  |  Optional amount of time each SVT will be valid. It's recommended to NOT use limited validity time, but instead let the general trust in the applied algorithm determine for how long an SVT can be trusted and used.
+sigval-service.svt.model.audience  |  An optional array (comma separated) of identifiers (URI recommended) of audiences for which the SVT is intended. This parameter MAY be used to limit the scope of an SVT that are not intended for public use.
+sigval-service.svt.model.cert-ref  |  See KID in section 2.5
+sigval-service.svt.model.sig-algo  | The signature algorithm, secified using an URI identifier, used to sign SVT. This also determine the hash algorithm used to hash data in the SVT. This algorihm must be compatible with the SVT signing key.
+
+
+## 2.5 Using KeyID
+Signature Validation Tokens have an option to include a key ID (KID) in the header of the SVT instead of including the actual signing certificate.
+
+The KID is the hash of the signing certificate, using the specified hash algorithm used to sign the SVT.
+
+KID can be used to reduce the size of SVT where a know key is used to sign the SVT. This option is enabled in the SVT issuer by setting the parameter `sigval-service.svt.model.cert-ref` to `true`. If this parameter is set to false, then the complete certificate will be included in the SVT header.
+
+To support validation of SVT with KID, the SVT validator need to know known SVT signing certificates used to match with the provided KID. Known SVT singing certificates are placed in a folder (PEM encoded certificates), and the location of this folder is specified using the parameter `sigval-service.cert-validator.svt.kid-match-folder`
+
 
 ## 3. Operation
 ### 3.1. Running the docker container
