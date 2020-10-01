@@ -128,7 +128,7 @@ This main key is specified using the following parameters in application.propert
 
 Property | Value
 ---|---
-sigval-service.keySourceType | Defines type = `jks`, `pkcs11`, `pkcs12`, `pem` or `create`. (Case ignore match)
+sigval-service.keySourceType | Defines type = `jks`, `pkcs11`, `pkcs12`, `pem` or `create`. (Case ignore match). **IMPORTANT NOTE:** The `create` option is just for test. This key is never stored and a new key is generated at restart.
 sigval-service.keySourceLocation | `file://`, `http`, `https` or `classpath:` location. (Not applicable for PKCS#11 keys)
 sigval-service.keySourcePass | Password to private key (or pin for key access in case of PKCS#11), if necessary
 sigval-service.keySourceAlias | Optional alias for private key if applicable. PKCS#11 keys MUST provide alias.
