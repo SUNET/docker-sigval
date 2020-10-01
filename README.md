@@ -66,12 +66,12 @@ sigval-service.ui.issue-svt-if-svt-exist  |  If set to `true`, the service will 
 sigval-service.ui.enalbe-signed-data-view  |  If set to `false`, no option to see signed version of the document will be displayed
 sigval-service.ui.show-loa  |  If set to `false`, the resulting Level of Assurance URI will not be shown in the result
 sigval-service.ui.display-downloaded-svt-pdf  |  If `true`, the download PDF SVT option will cause the received document to be displayed in the browser. If set to `false`, the document will not be shown, but downloaded directly to the default download location.
-sigval-service.ui.display-downloaded-svt-xml  | Same as previous for XML documents.
+sigval-service.ui.display-downloaded-svt-xml  | Same as above for XML documents.
 sigval-service.ui.downloaded-svt-suffix  | Set the suffix to append to SVT enhanced documents. The suffix will be placed just before the document file extension. E.g.  filename{suffix}.xml or  filename{suffix}.pdf. Default setting is ".svt" as suffix.
 sigval-service.svt.issuer-enabled  | Set to true to enable the SVT issuer, offering the service to extend validated signed documents with an SVT token.
 sigval-service.svt.validator-enabled  | Set to true to enable SVT validation of signed documents that has been enahnced with SVT.
 
-## 2.3 Trust configuration
+### 2.3 Trust configuration
 
 The signature validation service provide individual trust configuraiton for 3 types of signed objets
 
@@ -93,7 +93,7 @@ The `tsltrust-root` and `trusted-folder` configuration options can be used indiv
 
 The certificates `EuQCCert_root.cer` and `EuQCTsa_root.cer` are sample root certificates that can be used for `tsltrust-root` configuraiton where `EuQCCert_root.cer` extends trust to EU QualifiedCertificate issuers and where `EuQCTsa_root.cer` extends trust to EU Qualified Timestamp services and EU QualifiedCertificate issuers. The latter is intended for timestamp validation and the first for certificate validation of EU qualified signatures.
 
-## 2.4 SVT Model
+### 2.4 SVT Model
 The SVT model defines critical parameters for issuing SVT tokens. The SVT model is defined by the following `application.properties` parameters
 
 Parameter | Feature
@@ -105,7 +105,7 @@ sigval-service.svt.model.cert-ref  |  See KID in section 2.5
 sigval-service.svt.model.sig-algo  | The signature algorithm, secified using an URI identifier, used to sign SVT. This also determine the hash algorithm used to hash data in the SVT. This algorihm must be compatible with the SVT signing key.
 
 
-## 2.5 Using KeyID
+### 2.5 Using KeyID
 Signature Validation Tokens have an option to include a key ID (KID) in the header of the SVT instead of including the actual signing certificate.
 
 The KID is the hash of the signing certificate, using the specified hash algorithm used to sign the SVT.
@@ -114,6 +114,50 @@ KID can be used to reduce the size of SVT where a know key is used to sign the S
 
 To support validation of SVT with KID, the SVT validator need to know known SVT signing certificates used to match with the provided KID. Known SVT singing certificates are placed in a folder (PEM encoded certificates), and the location of this folder is specified using the parameter `sigval-service.cert-validator.svt.kid-match-folder`
 
+
+
+
+### 2.6 Key configuration
+#### 2.6.1. Service keys
+
+By default, the key specified in application.properties is used for all purposes.
+
+- SVT signing key (Signing)
+
+This main key is specified using the following parameters in application.properties
+
+Property | Value
+---|---
+sigval-service.keySourceType | Defines type = `jks`, `pkcs11`, `pkcs12`, `pem` or `create`. (Case ignore match)
+sigval-service.keySourceLocation | `file://`, `http`, `https` or `classpath:` location. (Not applicable for PKCS#11 keys)
+sigval-service.keySourcePass | Password to private key (or pin for key access in case of PKCS#11), if necessary
+sigval-service.keySourceAlias | Optional alias for private key if applicable. PKCS#11 keys MUST provide alias.
+sigval-service.keySourceCertLocation | Location of separate cert file if any
+
+
+#### 2.6.2 PKCS#11 configuration
+
+External PKCS#11 tokens, as well as softhsm PKCS#11 tokens can be configured through the settings above. Using PKCS#11 requires however that generic configuration parameters for PKCS#11 are set.
+
+These are:
+
+Parameter | Value
+---|---
+`sigval-service.pkcs11.reloadable-keys` | Specifies if private keys shall be tested and reloaded if connection to the key is lost, prior to each usage. Using this option (**true**) have performance penalties but may increase stability.
+`sigval-service.pkcs11.external-config-locations` | Specifies an array of file paths to PKCS#11 configuration files used to setup PKCS11 providers. **If this option is set, all other options below are ignored**.
+`sigval-service.pkcs11.lib` | location of pkcs#11 library
+`sigval-service.pkcs11.name` | A chosen name of the PKCS#11 provider. The actual name of the provider will be "SunPKCS11-{this name}-{index}".
+`sigval-service.pkcs11.slotListIndex` | The start slot index to use (default 0).
+`sigval-service.pkcs11.slotListIndexMaxRange` | The maximum number of slots after start index that will be used if present. Default null. A null value means that only 1 slot will be used.
+`sigval-service.pkcs11.slot` | The actual name of the slot to use. If this parameter is set, then slotListIndex should not be set.
+
+
+**Soft HSM** properties in addition to generic PKCS#11 properties above are specified as follows. Note that for soft hsm, the parameters slot, slotListIndex and slotListIndexMaxRange are ignored.
+
+Parameter | Value
+---|---
+`sigval-service.pkcs11.softhsm.keylocation` | The location of keys using the name convention alias.key and alias.crt.
+`sigval-service.pkcs11.softhsm.pass` | The pin/password for the soft hsm slot to use. This pin/password should be configured as the password for each configured key.
 
 ## 3. Operation
 ### 3.1. Running the docker container
@@ -147,47 +191,3 @@ Use of http or https access to the service is specified in `application.properti
 The environment variable `SPRING_CONFIG_ADDITIONAL_LOCATION`, specifies the location where the data folder is located. Note that the specified location must end with a "/" character.
 
 All property values in application.properties can ve overridden by docker run environment variable settings. The convention is to specify the property name in uppercase letters and replace "." and "-" characters with underscore " _ ".
-
-
-
-## 4. Key configuration
-### 4.1. Service keys
-
-By default, the key specified in application.properties is used for all purposes.
-
-- SVT signing key (Signing)
-
-This main key is specified using the following parameters in application.properties
-
-Property | Value
----|---
-sigval-service.keySourceType | Defines type = `jks`, `pkcs11`, `pkcs12`, `pem` or `create`. (Case ignore match)
-sigval-service.keySourceLocation | `file://`, `http`, `https` or `classpath:` location. (Not applicable for PKCS#11 keys)
-sigval-service.keySourcePass | Password to private key (or pin for key access in case of PKCS#11), if necessary
-sigval-service.keySourceAlias | Optional alias for private key if applicable. PKCS#11 keys MUST provide alias.
-sigval-service.keySourceCertLocation | Location of separate cert file if any
-
-
-### 4.2 PKCS#11 configuration
-
-External PKCS#11 tokens, as well as softhsm PKCS#11 tokens can be configured through the settings above. Using PKCS#11 requires however that generic configuration parameters for PKCS#11 are set.
-
-These are:
-
-Parameter | Value
----|---
-`sigval-service.pkcs11.reloadable-keys` | Specifies if private keys shall be tested and reloaded if connection to the key is lost, prior to each usage. Using this option (**true**) have performance penalties but may increase stability.
-`sigval-service.pkcs11.external-config-locations` | Specifies an array of file paths to PKCS#11 configuration files used to setup PKCS11 providers. **If this option is set, all other options below are ignored**.
-`sigval-service.pkcs11.lib` | location of pkcs#11 library
-`sigval-service.pkcs11.name` | A chosen name of the PKCS#11 provider. The actual name of the provider will be "SunPKCS11-{this name}-{index}".
-`sigval-service.pkcs11.slotListIndex` | The start slot index to use (default 0).
-`sigval-service.pkcs11.slotListIndexMaxRange` | The maximum number of slots after start index that will be used if present. Default null. A null value means that only 1 slot will be used.
-`sigval-service.pkcs11.slot` | The actual name of the slot to use. If this parameter is set, then slotListIndex should not be set.
-
-
-**Soft HSM** properties in addition to generic PKCS#11 properties above are specified as follows. Note that for soft hsm, the parameters slot, slotListIndex and slotListIndexMaxRange are ignored.
-
-Parameter | Value
----|---
-`sigval-service.pkcs11.softhsm.keylocation` | The location of keys using the name convention alias.key and alias.crt.
-`sigval-service.pkcs11.softhsm.pass` | The pin/password for the soft hsm slot to use. This pin/password should be configured as the password for each configured key.
