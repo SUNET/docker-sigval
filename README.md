@@ -70,6 +70,7 @@ sigval-service.ui.display-downloaded-svt-xml  | Same as above for XML documents.
 sigval-service.ui.downloaded-svt-suffix  | Set the suffix to append to SVT enhanced documents. The suffix will be placed just before the document file extension. E.g.  filename{suffix}.xml or  filename{suffix}.pdf. Default setting is ".svt" as suffix.
 sigval-service.svt.issuer-enabled  | Set to true to enable the SVT issuer, offering the service to extend validated signed documents with an SVT token.
 sigval-service.svt.validator-enabled  | Set to true to enable SVT validation of signed documents that has been enahnced with SVT.
+sigval-service.validator.strict-pdf-context  |  Setting this property to `true` means that the validator will not tolerate that the PDF document is updated through a re-save which may update the Document Security Store (DSS), metadata and document info. A setting to `false` will allow such chages after signing.
 
 ### 2.3 Trust configuration
 
