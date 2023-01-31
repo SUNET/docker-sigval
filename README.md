@@ -1,6 +1,6 @@
 
 ---
-# CURRENT BUILD VERSION = 1.0.3
+# CURRENT BUILD VERSION = 1.2.0
 ---
 # eduSign SVT enabled Signature Validation Service
 
@@ -12,6 +12,73 @@ This repo contains build and deploy scripts for the eduSign SVT enabled signatur
 4. Deploying the docker image as docker container.
 
 The signature validation service is provided as a Spring Boot application which is deployed to the maven repo at: [https://maven.eidastest.se](https://maven.eidastest.se/artifactory/webapp/#/home)
+
+## Supported signature formats
+
+This application supports validation of the following signature formats:
+
+- XML DSig signed documents
+- ETSI XAdES signed documents
+- PDF signed documents
+- ETSI PAdES signed documents
+- JOSE signed documents (JSON signature)
+- ETSI JAdES signed documents
+
+## Archiving support
+
+This service use the open source implementation of Signature Validation Tokens, currently under publication by the Internet Engineering Task force.
+
+Current draft: [https://datatracker.ietf.org/doc/draft-santesson-svt](https://datatracker.ietf.org/doc/draft-santesson-svt)
+
+The SVT is tool for preservation and archival of validation result. This means that the SVT is a simple format to store and archive a validation result as a result of a signature validation process. The signature validation result is bound to the signed document and the validated signature in a way that allows the signature validation result to be validated against the signed document into a distant future, allowing the signed document to be archived for a very long time where the signature validation result is preserved along with the signed document.
+
+The SVT is a complementary technology to various solutions used to validate signatures, including complex solutions for validation of old signatures. Once the validation solution has been used to validate the signature, then that validation result can be preserved using SVT.
+
+## REST API for signature validation and issuing SVT
+
+### Signature validation REST API
+
+This REST API allows an external service to upload a signed document (XML, PDF or JOSE) for validation and to obtain a full validation report for this document
+according to ETSI TS 119 102-2
+
+| Property     | value                                                                        |
+|--------------|------------------------------------------------------------------------------|
+| URL          | "`/report`" (e.g. `http://example.com/sigval/report`)                        |
+| method       | POST                                                                         |
+| data         | the bytes of the document to be validated (PDF, XML or JOSE signed document) |
+| content-type | Any (Recommended to use the content-type of the uploaded document)           |
+| returns      | XML document containing the ETSI TS 119 102-2 validation report              |
+
+| query parameters | value                                                                                                                                                                                                 |
+|------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `certpath`       | Value `true` includes information about the full certificate path in the validation report. Default = `false` (only include signer certificate).                                                      |
+| `include-docs`   | Value `true` includes the data signed by the signature (JSON, XML) or the version of the document before signing (PDF) in the report for each signature. Default = `false` (only include hash value). |
+
+### SVT issuance REST API
+
+This REST API allows an external service to upload a signed document (XML, PDF of JOSE) for validation and returns the same document enhanced with an SVT
+issued by this service.
+
+| Property     | value                                                                        |
+|--------------|------------------------------------------------------------------------------|
+| URL          | "`/issue-svt`" (e.g. `http://example.com/sigval/issue-svt`)                  |
+| method       | POST                                                                         |
+| data         | the bytes of the document to be validated (PDF, XML or JOSE signed document) |
+| content-type | Any (Recommended to use the content-type of the uploaded document)           |
+| returns      | the uploaded document enhanced with an SVT (on success)                      |
+
+| query parameters | value                                                                                                                                    |
+|------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`           | The name of the document used when returning the svt enhanced signed document                                                            |
+| `replace`        | Value `true` causes any existing SVT in the document to be replaced with a new SVT. Default = `false` (Add this SVT to any existing SVT) |
+
+## Demo deployment
+
+A demo deployment of this service is available here: [https://sandbox.swedenconnect.se/sigval/](https://sandbox.swedenconnect.se/sigval/).
+
+IMPORTANT NOTE: This service MUST NOT be used to validate signatures on real documents for production purposes. This service is configured to trust various test keys and identities and a positive validation result provided by this service is no statement of validity beyond the scope of testing the technology itself.
+
+
 
 ## 1. Building docker file
 
@@ -33,6 +100,7 @@ Usage: build.sh [options...]
    -c, --clear            Clears the target directory after a successful build (default is to keep it)
    -h, --help             Prints this help
 ```
+
 
 ## 2. Configuration
 ### 2.1 General
@@ -70,6 +138,7 @@ sigval-service.ui.display-downloaded-svt-xml  | Same as above for XML documents.
 sigval-service.ui.downloaded-svt-suffix  | Set the suffix to append to SVT enhanced documents. The suffix will be placed just before the document file extension. E.g.  filename{suffix}.xml or  filename{suffix}.pdf. Default setting is ".svt" as suffix.
 sigval-service.svt.issuer-enabled  | Set to true to enable the SVT issuer, offering the service to extend validated signed documents with an SVT token.
 sigval-service.svt.validator-enabled  | Set to true to enable SVT validation of signed documents that has been enahnced with SVT.
+sigval-service.validator.strict-pdf-context  |  Setting this property to `true` means that the validator will not tolerate that the PDF document is updated through a re-save which may update the Document Security Store (DSS), metadata and document info. A setting to `false` will allow such chages after signing.
 
 ### 2.3 Trust configuration
 
@@ -137,27 +206,60 @@ sigval-service.keySourceCertLocation | Location of separate cert file if any
 
 #### 2.6.2 PKCS#11 configuration
 
-External PKCS#11 tokens, as well as softhsm PKCS#11 tokens can be configured through the settings above. Using PKCS#11 requires however that generic configuration parameters for PKCS#11 are set.
+External PKCS#11 tokens can be configured through the settings above. Using PKCS#11 requires however that generic configuration parameters for PKCS#11 are set.
 
 These are:
 
 Parameter | Value
 ---|---
-`sigval-service.pkcs11.reloadable-keys` | Specifies if private keys shall be tested and reloaded if connection to the key is lost, prior to each usage. Using this option (**true**) have performance penalties but may increase stability.
-`sigval-service.pkcs11.external-config-locations` | Specifies an array of file paths to PKCS#11 configuration files used to setup PKCS11 providers. **If this option is set, all other options below are ignored**.
-`sigval-service.pkcs11.lib` | location of pkcs#11 library
-`sigval-service.pkcs11.name` | A chosen name of the PKCS#11 provider. The actual name of the provider will be "SunPKCS11-{this name}-{index}".
-`sigval-service.pkcs11.slotListIndex` | The start slot index to use (default 0).
-`sigval-service.pkcs11.slotListIndexMaxRange` | The maximum number of slots after start index that will be used if present. Default null. A null value means that only 1 slot will be used.
-`sigval-service.pkcs11.slot` | The actual name of the slot to use. If this parameter is set, then slotListIndex should not be set.
+`sigval-service.pkcs11.external-config-locations` | Specifies a file path to a PKCS#11 configuration file used to setup PKCS11 providers.
+
+For mor information about the format of PKCS#11 configuration files see [PKCS#11 Reference Guide](https://docs.oracle.com/en/java/javase/11/security/pkcs11-reference-guide1.html)
+
+### 2.7 Signature validation report configuration
+
+A report generator provides signed ETSI 119 102-2 validation reports. This requires the service to assign a signing key for signing the validation reports using the following properties:
+
+```
+# Sigval Report Key source. This key source is used to sign signature validation reports.
+sigval-service.report.keySourceType=create
+sigval-service.report.keySourceLocation=#{null}
+sigval-service.report.keySourcePass=#{null}
+sigval-service.report.keySourceAlias=#{null}
+sigval-service.report.keySourceCertLocation=#{null}
+```
+
+The report generator has the following default settings that may be modified:
+
+```
+# Report Generator
+sigval-service.report.default-digest-algorithm=http://www.w3.org/2001/04/xmlenc#sha256
+sigval-service.report.default-include-chain=false
+sigval-service.report.default-include-tschain=false
+sigval-service.report.default-include-siged-doc=false
+```
+
+**default-digest-algorithm** sets the default digest algorithm to use to hash referenced data in the report. This value
+is overridden by any hash algorithm enforced by data imported from a source using any other digest algorithm.
+
+**default-include-chain** sets the default value whether signature validation reports should include the full signing
+certificate validation chain
+
+**default-include-tschain** sets the default value whether time stamp signing certificates should be included in the report
+
+General settings with defaults
+
+```
+sigval-service.svt.default-replace=true
+sigval-service.ui.show-report-options=true
+```
+
+**default-replace** defines whether XML and JOSE documents that has a present SVT should have this SVT replaced if a new SVT is issued
+or whether the new SVT should be amended to the existing SVT.
+
+**show-report-options** should be set to `false` to remove the report options pop-up when a report is requested.
 
 
-**Soft HSM** properties in addition to generic PKCS#11 properties above are specified as follows. Note that for soft hsm, the parameters slot, slotListIndex and slotListIndexMaxRange are ignored.
-
-Parameter | Value
----|---
-`sigval-service.pkcs11.softhsm.keylocation` | The location of keys using the name convention alias.key and alias.crt.
-`sigval-service.pkcs11.softhsm.pass` | The pin/password for the soft hsm slot to use. This pin/password should be configured as the password for each configured key.
 
 ## 3. Operation
 ### 3.1. Running the docker container
