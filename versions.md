@@ -14,6 +14,61 @@ Version | Comment                                                               
 1.2.0  | Updated dependencies and upgrade to Sweden Connect Credential Support library for PKCS11 and HSM integration | 2023-01-30
 1.3.2  | Java 21 and Spring Boot 3.4.4                                                                                | 2025-05-28
 
+
+## version 1.2.8
+
+This version adds two new configuration options in `application.properties`
+
+> sigval-service.ui.hide-attribute
+
+and
+
+> sigval-service.ui.hide-loa-uri
+
+The `sigval-service.ui.hide-attribute` property holds an optional comma-separated list of certificate attribute OID:s.
+Any OID found in this list will not be displayed as an ID attribute of the user.
+This option is intended
+to be used when the certificate subject name contains attributes that are not representing the identity of the subject,
+such as if an attribute holding the "level of assurance" of the authentication process is present as an attribute.
+
+The `sigval-service.ui.hide-loa-uri` property holds an optional comma-separated list of AuthenticationContextClassRef URI:s that should not be displayed
+as the level of assurance achieved on the result page.
+This option may be used if a generic non informative URI is present in the certificate
+(e.g. `urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport`).
+
+**NOTE:** For LoA URI to be shown at all in the result UI, the property `sigval-service.ui.show-loa` must be set to true.
+
+
+## version 1.2.8
+
+This version adds a new configuration option in `application.properties`
+
+> sigval-service.svt.issue-on-failed-validation=false
+
+If not set, this property defaults to the value `false`.
+If this is the preferred choice,
+no changes to configuration are necessary from previous versions.
+
+When this property is set to `false`,
+the validation service will not issue an SVT enhanced document unless all signatures on the document validates successfully.
+
+Setting this option to `true` will allow the validation service to issue an SVT if possible, regardless of validation result.
+Note that if validation was not successful, the SVT will indicate that the validation was not successful, but it will still be issued.
+
+## version 1.2.6
+
+This version includes two new configuration settings for delivery of SVT as an inline document or as an attachment.
+
+```
+sigval-service.svt.download-attachment=true
+sigval-service.svt.new-svt-tab=true
+```
+
+These are the default settings of the property parameters. `download-attachment` set to `true` causes the SVT document to be downloaded
+and saved to disk. The value of `false` causes the document to be shown in the browser.
+`new-svt-tab` set to `true` opens a new tab for returning the svt document. Setting this to `false` returns the document in the current tab.
+
+
 ## 1.2.0
 This version removes the SoftHSM options and direct PKCS11 configuratoin options and new require all PKCS11 configuration to
 be provided using an external configuration file.
