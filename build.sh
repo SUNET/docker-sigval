@@ -9,8 +9,6 @@
 usage() {
     echo "Usage: $0 [options...]" >&2
     echo
-    echo "   -u, --user             Username for Maven repository (default is eidasuser)"
-    echo "   -p, --passwd           Password for Maven repository (will be prompted for if not given)"
     echo "   -v, --version          Version for artifact to download"
     echo "   -i, --image            Name of image to create (default is sigval-service)"
     echo "   -t, --tag              Optional docker tag for image"
@@ -21,13 +19,11 @@ usage() {
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-MAVEN_REPO_URL=https://maven.eidastest.se/artifactory/eidas-release-local
+MAVEN_REPO_URL=https://repo1.maven.org/maven2
 ARTIFACT_NAME=sigval-service
 ARTIFACT_REPO_PATH=/se/idsec/sigval/${ARTIFACT_NAME}/
 FILE_EXTENSION=jar
 
-USERNAME=""
-PASSWD=""
 VERSION=""
 IMAGE_NAME=""
 DOCKER_TAG=""
@@ -39,14 +35,6 @@ do
 	-h | --help)
 	    usage
 	    exit 0
-	    ;;
-	-u | --user)
-	    USERNAME="$2"
-	    shift 2
-	    ;;
-	-p | --passwd)
-	    PASSWD="$2"
-	    shift 2
 	    ;;
 	-v | --version)
 	    VERSION="$2"
@@ -85,19 +73,9 @@ if [ "$VERSION" == "" ]; then
     exit 1
 fi
 
-if [ "$USERNAME" == "" ]; then
-    USERNAME=eidasuser
-    echo "Maven username not given, defaulting to $USERNAME" >&1
-fi
 if [ "$IMAGE_NAME" == "" ]; then
     IMAGE_NAME=sigval-service
     echo "Docker image name not given, defaulting to $IMAGE_NAME" >&1
-fi
-
-if [ "$PASSWD" == "" ]; then
-    echo -n "Maven password: "
-    read -s PASSWD
-    echo
 fi
 
 if [ -d "$SCRIPT_DIR/target" ]; then
@@ -110,8 +88,8 @@ mkdir "$SCRIPT_DIR/target"
 #
 
 echo "Downloading ${ARTIFACT_NAME}-${VERSION}.${FILE_EXTENSION} ..."
-echo "Download command: curl --silent --user ${USERNAME}:${PASSWD} -o ${SCRIPT_DIR}/target/${ARTIFACT_NAME}.${FILE_EXTENSION} -w "%{http_code}" ${MAVEN_REPO_URL}${ARTIFACT_REPO_PATH}${VERSION}/${ARTIFACT_NAME}-${VERSION}.${FILE_EXTENSION}"
-HTTP_STATUS=$(curl --silent --user ${USERNAME}:${PASSWD} -o ${SCRIPT_DIR}/target/${ARTIFACT_NAME}.${FILE_EXTENSION} -w "%{http_code}" ${MAVEN_REPO_URL}${ARTIFACT_REPO_PATH}${VERSION}/${ARTIFACT_NAME}-${VERSION}.${FILE_EXTENSION})
+echo "Download command: curl --silent -o ${SCRIPT_DIR}/target/${ARTIFACT_NAME}.${FILE_EXTENSION} -w "%{http_code}" ${MAVEN_REPO_URL}${ARTIFACT_REPO_PATH}${VERSION}/${ARTIFACT_NAME}-${VERSION}.${FILE_EXTENSION}"
+HTTP_STATUS=$(curl --silent -o ${SCRIPT_DIR}/target/${ARTIFACT_NAME}.${FILE_EXTENSION} -w "%{http_code}" ${MAVEN_REPO_URL}${ARTIFACT_REPO_PATH}${VERSION}/${ARTIFACT_NAME}-${VERSION}.${FILE_EXTENSION})
 
 if [ "$HTTP_STATUS" != "200" ]; then
     echo "Failed to download $ARTIFACT_NAME from Maven - got HTTP STATUS $HTTP_STATUS"
@@ -119,7 +97,7 @@ if [ "$HTTP_STATUS" != "200" ]; then
 fi
 
 echo "Downloading ${ARTIFACT_NAME}-${VERSION}.${FILE_EXTENSION}.asc (signature) ..."
-HTTP_STATUS=$(curl --silent --user ${USERNAME}:${PASSWD} -o ${SCRIPT_DIR}/target/${ARTIFACT_NAME}.${FILE_EXTENSION}.asc -w "%{http_code}" ${MAVEN_REPO_URL}${ARTIFACT_REPO_PATH}${VERSION}/${ARTIFACT_NAME}-${VERSION}.${FILE_EXTENSION}.asc)
+HTTP_STATUS=$(curl --silent -o ${SCRIPT_DIR}/target/${ARTIFACT_NAME}.${FILE_EXTENSION}.asc -w "%{http_code}" ${MAVEN_REPO_URL}${ARTIFACT_REPO_PATH}${VERSION}/${ARTIFACT_NAME}-${VERSION}.${FILE_EXTENSION}.asc)
 
 if [ "$HTTP_STATUS" != "200" ]; then
     echo "Failed to download signed file for $ARTIFACT_NAME from Maven - got HTTP STATUS $HTTP_STATUS"

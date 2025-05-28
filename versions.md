@@ -1,16 +1,18 @@
 # Signature Validation Service versions
 
-**Latest Current version: 1.2.0**
+**Latest Current version: 1.3.2**
 
-Version | Comment | Date
----|---|---
-1.0.0 | Initial release | 2020-10-01
-1.0.1  | Support for signature validaion date limit   | 2020-10-02
-1.0.2  | Fixed file size issue   | 2020-10-06
-1.0.3  | Fxed chain_hash bug in svt lib  | 2020-10-23
-1.0.4  | Updated PDF context checking to allow legitimate changes to PDF documents afters signing  | 2021-02-02
-1.1.0  | Support for JSON validation, ETSI 110 102-2 validation report and REST API for validation and SVT issuing | 2022-05-04
-1.2.0  | Updated dependencies and upgrade to Sweden Connect Credential Support library for PKCS11 and HSM integration  | 2023-01-30
+Version | Comment                                                                                                      | Date
+---|--------------------------------------------------------------------------------------------------------------|---
+1.0.0 | Initial release                                                                                              | 2020-10-01
+1.0.1  | Support for signature validaion date limit                                                                   | 2020-10-02
+1.0.2  | Fixed file size issue                                                                                        | 2020-10-06
+1.0.3  | Fxed chain_hash bug in svt lib                                                                               | 2020-10-23
+1.0.4  | Updated PDF context checking to allow legitimate changes to PDF documents afters signing                     | 2021-02-02
+1.1.0  | Support for JSON validation, ETSI 110 102-2 validation report and REST API for validation and SVT issuing    | 2022-05-04
+1.2.0  | Updated dependencies and upgrade to Sweden Connect Credential Support library for PKCS11 and HSM integration | 2023-01-30
+1.2.0  | Updated dependencies and upgrade to Sweden Connect Credential Support library for PKCS11 and HSM integration | 2023-01-30
+1.3.2  | Java 21 and Spring Boot 3.4.4                                                                                | 2025-05-28
 
 ## 1.2.0
 This version removes the SoftHSM options and direct PKCS11 configuratoin options and new require all PKCS11 configuration to
