@@ -30,8 +30,8 @@ if [ "x$CHAIN" != "x" ]; then
    OPENSSL_ARGS="-chain $CHAIN"
 fi
 
-openssl pkcs12 -export -password "pass:dummy" -out /tmp/${CERTNAME}.p12 -inkey $KEYDIR/private/${CERTNAME}.key -in $KEYDIR/certs/${CERTNAME}.crt $OPENSSL_ARGS
+openssl pkcs12 -export -legacy -password "pass:dummy23WhatNot" -out /tmp/${CERTNAME}.p12 -inkey $KEYDIR/private/${CERTNAME}.key -in $KEYDIR/certs/${CERTNAME}.crt $OPENSSL_ARGS
 
 export SERVER_SSL_KEY_STORE=/tmp/${CERTNAME}.p12
 
-exec java $JAVA_OPTS -Dserver.ssl.key-store=$SERVER_SSL_KEY_STORE -Dserver.ssl.key-store-type=PKCS12 -Dserver.ssl.key-store-password=dummy -Dserver.ssl.key-password=dummy -Djava.security.egd=file:/cfg/./urandom -jar /app.jar
+exec java $JAVA_OPTS -Dserver.ssl.key-store=$SERVER_SSL_KEY_STORE -Dserver.ssl.key-store-type=PKCS12 -Dserver.ssl.key-store-password=dummy23WhatNot -Dserver.ssl.key-password=dummy23WhatNot -Djava.security.egd=file:/cfg/./urandom -jar /app.jar
