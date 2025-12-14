@@ -1,6 +1,6 @@
 # Signature Validation Service versions
 
-**Latest Current version: 1.3.4**
+**Latest Current version: 1.3.5**
 
 | Version | Comment                                                                                                                               | Date       |
 |---------|---------------------------------------------------------------------------------------------------------------------------------------|------------|
@@ -24,6 +24,7 @@
 | 1.3.2   | Spring Boot 3.4.4, credential support 2.0.5, publication to maven central                                                             | 2025-05-28 |
 | 1.3.3   | Spring Boot 3.5.6, signature validation 1.3.3, with more liberal controls on annotation updates in document timestamps and signatures | 2025-09-25 |
 | 1.3.4   | Allows any widget annotation updates and field updates to signatures and doc timestamps.                                              | 2025-10-16 |
+| 1.3.5   | Bugfix. Updated destination URL from whitelist on lang select.                                                                        | 2025-12-14 |
 
 ## version 1.2.8
 
