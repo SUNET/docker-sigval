@@ -25,6 +25,7 @@
 | 1.3.3   | Spring Boot 3.5.6, signature validation 1.3.3, with more liberal controls on annotation updates in document timestamps and signatures | 2025-09-25 |
 | 1.3.4   | Allows any widget annotation updates and field updates to signatures and doc timestamps.                                              | 2025-10-16 |
 | 1.3.5   | Bugfix. Updated destination URL from whitelist on lang select.                                                                        | 2025-12-14 |
+| 1.4.0   | Spring Boot 4.0.4 and signature-validation 2.0.1 fixing PDF context processing to fix post signature update acceptance.               | 2026-04-29 |
 
 ## version 1.2.8
 
