@@ -1,6 +1,6 @@
 # Signature Validation Service versions
 
-**Latest Current version: 1.3.5**
+**Latest Current version: 1.4.1**
 
 | Version | Comment                                                                                                                               | Date       |
 |---------|---------------------------------------------------------------------------------------------------------------------------------------|------------|
@@ -26,6 +26,7 @@
 | 1.3.4   | Allows any widget annotation updates and field updates to signatures and doc timestamps.                                              | 2025-10-16 |
 | 1.3.5   | Bugfix. Updated destination URL from whitelist on lang select.                                                                        | 2025-12-14 |
 | 1.4.0   | Spring Boot 4.0.4 and signature-validation 2.0.1 fixing PDF context processing to fix post signature update acceptance.               | 2026-04-29 |
+| 1.4.1   | Fixed unzip vulnearability id docType tests. Support for certificates with noRevAvail extension                                       | 2026-07-02 |
 
 ## version 1.2.8
 
