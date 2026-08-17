@@ -1,6 +1,6 @@
 
 ---
-# CURRENT BUILD VERSION = 1.5.0
+# CURRENT BUILD VERSION = 1.5.1
 ---
 # eduSign SVT enabled Signature Validation Service
 

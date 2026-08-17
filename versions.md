@@ -1,6 +1,6 @@
 # Signature Validation Service versions
 
-**Latest Current version: 1.5.0**
+**Latest Current version: 1.5.1**
 
 | Version | Comment                                                                                                                                                    | Date       |
 |---------|------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
@@ -28,6 +28,7 @@
 | 1.4.0   | Spring Boot 4.0.4 and signature-validation 2.0.1 fixing PDF context processing to fix post signature update acceptance.                                    | 2026-04-29 |
 | 1.4.1   | Fixed unzip vulnearability id docType tests. Support for certificates with noRevAvail extension                                                            | 2026-07-02 |
 | 1.5.0   | Fixed critical vulnerabilities for SVT validation and PDF context checks. Fixed bug with showing signed content if signature does not cover full document. | 2026-08-13 |
+| 1.5.1   | Fixed XML and PDF problems that could cause a docuemtn to falsely be indicated as signature covers full document content                                   | 2026-08-18 |
 
 ## version 1.2.8
 
